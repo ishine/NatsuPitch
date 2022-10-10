@@ -570,6 +570,7 @@ def pyin(
     fill_na=np.nan,
     center=True,
     pad_mode="constant",
+    device="cpu"
 ):
     """Fundamental frequency (F0) estimation using probabilistic YIN (pYIN).
     pYIN [#]_ is a modificatin of the YIN algorithm [#]_ for fundamental frequency (F0) estimation.
@@ -754,7 +755,7 @@ def pyin(
     p_init = np.zeros(2 * n_pitch_bins)
     p_init[n_pitch_bins:] = 1 / n_pitch_bins
 
-    states = sequence.viterbi(observation_probs, transition, p_init=p_init)
+    states = sequence.viterbi(observation_probs, transition, p_init=p_init, device=device)
 
     # Find f0 corresponding to each decoded pitch bin.
     freqs = fmin * 2 ** (np.arange(n_pitch_bins) / (12 * n_bins_per_semitone))
