@@ -21,12 +21,10 @@ def show_example():
 
 # show_example()
 
-def librosa_pyin():
-    y, sr = librosa.load(librosa.ex('trumpet'))
+def librosa_pyin(y, sr):
     f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
-def natsu_pyin():
-    y, sr = librosa.load(librosa.ex('trumpet'))
+def natsu_pyin(y, sr):
     f0, voiced_flag, voiced_probs = natsupitch.core.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
     '''
@@ -42,13 +40,37 @@ def natsu_pyin():
     plt.show()
     '''
 
+import harmof0
+import torchaudio
+pit = harmof0.PitchTracker()
 
+def harmo(waveform, sr):
+    time, freq, activation, activation_map = pit.pred(waveform, sr)
+
+waveform, sr = torchaudio.load(librosa.ex('trumpet'))
+
+resampler = torchaudio.transforms.Resample(orig_freq=sr, new_freq=16000)
+waveform = resampler(waveform)
+waveform_np = waveform.numpy()
+sr = 16000
+
+print("librosa PYIN")
 start = time.time()
-librosa_pyin()
+for i in range(10):
+    librosa_pyin(waveform_np, sr)
 end = time.time()
 print(end - start)
 
+print("Optimizated PYIN")
 start = time.time()
-natsu_pyin()
+for i in range(10):
+    natsu_pyin(waveform_np, sr)
+end = time.time()
+print(end - start)
+
+print("HarmoF1")
+start = time.time()
+for i in range(10):
+    harmo(waveform, sr)
 end = time.time()
 print(end - start)
